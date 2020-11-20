@@ -14,7 +14,7 @@ public class Main {
 //        String type=args[0];//获取是-c还是-m参数
 //        String pathTarget=args[1]; //获取target路径
 //        String pathChange=args[2];//获取Changeinfo路径
-        String type="-c";
+        String type="-m";
         String pathTarget="E:\\AT2020\\ClassicAutomatedTesting\\4-NextDay\\target";
         String pathChange="E:\\AT2020\\ClassicAutomatedTesting\\4-NextDay\\data\\change_info.txt";
         //将参数打印查看参数是否读取正确

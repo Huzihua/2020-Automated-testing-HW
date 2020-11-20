@@ -23,6 +23,8 @@ public class Analyze {
     ArrayList<String> change_class=new ArrayList<String>();//存放所有与修改的有关的类层，只有类
     ArrayList<String> change_class_method=new ArrayList<String>();//存放所有与修改的有关的类层的所有方法（要写进txt）
     ArrayList<Method> allMethods=new ArrayList<Method>();//存放所有的方法对象
+    ArrayList<String> nameOfTestClass=new ArrayList<String>();//存放所有得测试类得名字
+    ArrayList<String> initString=new ArrayList<String>();//存放所有的初始化函数
     //一些必要说明
     String scopePath="scope.txt";
     String exPath="exclusion.txt";
@@ -135,6 +137,11 @@ public class Analyze {
             if(f.isFile() && f.getName().endsWith(".class")) {
                 assert false;
                 allFile.add(f);
+                if(path.endsWith(source2)) {
+                    nameOfTestClass.add("Lnet/mooctest/"+f.getName().substring(0,f.getName().length()-6));//测试类的类内名
+                    initString.add("net.mooctest."+f.getName().substring(0,f.getName().length()-6)+".<init>()V");//初始化函数的类内名
+                    initString.add("net.mooctest."+f.getName().substring(0,f.getName().length()-6)+".initialize()V");
+                }
             }
         }
         return allFile;//返回结果
@@ -161,8 +168,8 @@ public class Analyze {
                     allMethods.add(tempMethod);
                 }
             }else {
-                System.out.println(String.format("'%s'不是一个ShrikeBTMethod：%s",node.getMethod(),
-                        node.getMethod().getClass()));
+               // System.out.println(String.format("'%s'不是一个ShrikeBTMethod：%s",node.getMethod(),
+                       // node.getMethod().getClass()));
             }
         }
 //再遍历一遍以获取所有的method之间的调用关系
@@ -252,7 +259,7 @@ public class Analyze {
         for(Method m:allMethods){
             if(change_class.contains(m.getClassInnerName())){
                 //注意去掉初始化函数
-                if(!m.getNames().contains("<init>()V")  && !m.getNames().contains("initialize") && !change_class_method.contains(m.getNames())) {
+                if(!change_class_method.contains(m.getNames())) {
                     change_class_method.add(m.getNames());
                 }
             }
@@ -331,7 +338,7 @@ public class Analyze {
         }
     }
     //写找到的与改变相关的方法和类的txt，也就是selection-class/method.txt
-    public static void writeFile2(ArrayList<String> content,String path) {
+    public  void writeFile2(ArrayList<String> content,String path) {
         try {
             File writeName = new File(path); // 相对路径，如果没有则要建立一个新的txt文件
             try (FileWriter writer = new FileWriter(writeName);
@@ -339,7 +346,7 @@ public class Analyze {
             ) {
                 for(String line:content){
                     //增加筛选条件，去掉初始化方法，非测试类方法
-                    if(line.endsWith("()V") && line.contains("Test") && !line.endsWith("<init>()V")) {
+                    if( nameOfTestClass.contains(line.split(" ")[0]) && !initString.contains(line.split(" ")[1])) {
                         out.write(line + "\r\n");
                     }
                 }
